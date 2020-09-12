@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
+       default-lazy-init="true">
+
+
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <!-- 数据源名，可用于监控日志输出 -->
+        <property name="name" value="localhost_3306" />
+
+        <!-- 基本属性 url、user、password -->
+        <property name="url"
+                  value="jdbc:mysql://127.0.0.1:3306/Ann_one?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8" />
+        <property name="username" value="root" />
+        <property name="password" value="789456123" />
+    </bean>
+
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- spring quartz 分布式调度配置配置开始 -->
+    <bean
+            class="org.example.quartz.SpringQuartAnnotationCronJobSchedulingListener">
+    </bean>
+    <!-- quartz定时任务的线程池 -->
+    <bean id="quartzTaskExecutor"
+          class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="10"/>
+        <property name="maxPoolSize" value="50"/>
+        <property name="queueCapacity" value="100"/>
+        <property name="keepAliveSeconds" value="60"/>
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$DiscardOldestPolicy"/>
+        </property>
+        <property name="waitForTasksToCompleteOnShutdown" value="true"/>
+        <property name="awaitTerminationSeconds" value="30"/>
+    </bean>
+    <bean name="quartzScheduler"
+          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="dataSource">
+            <ref bean="dataSource"/>
+        </property>
+        <property name="taskExecutor">
+            <ref bean="quartzTaskExecutor"/>
+        </property>
+        <property name="applicationContextSchedulerContextKey" value="applicationContextKey"/>
+        <property name="quartzProperties">
+            <map>
+                <entry key="org.quartz.scheduler.instanceName" value="wftscoreScheduler"/>
+                <entry key="org.quartz.scheduler.instanceId" value="AUTO"/>
+                <entry key="org.quartz.scheduler.skipUpdateCheck" value="true"/>
+                <entry key="org.quartz.jobStore.class" value="org.quartz.impl.jdbcjobstore.JobStoreTX"/>
+                <entry key="org.quartz.jobStore.driverDelegateClass"
+                       value="org.quartz.impl.jdbcjobstore.StdJDBCDelegate"/>
+                <entry key="org.quartz.jobStore.tablePrefix" value="QRTZ_"/>
+                <entry key="org.quartz.jobStore.isClustered" value="true"/>
+            </map>
+        </property>
+        <property name="jobFactory">
+            <bean class="org.example.quartz.SpringQuartzJobFactory"></bean>
+        </property>
+    </bean>
+    <!-- spring quartz 分布式调度配置配置结束 -->
+</beans>

@@ -20,9 +20,9 @@
             <!-- 数据源，池类型的数据源 -->
             <dataSource type="POOLED">
                 <property name="driver" value="com.mysql.jdbc.Driver" />
-                <property name="url" value="jdbc:Mysql://127.0.0.1:3306/org_example" />
+                <property name="url" value="jdbc:Mysql://localhost/Ann_one?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=CTT" />
                 <property name="username" value="root" />
-                <property name="password" value="123456789" />
+                <property name="password" value="789456123" />
             </dataSource>
         </environment>
     </environments>
